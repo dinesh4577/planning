@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Study Schedule - April</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Base & Theme Styles --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Tailwind gray-900 */
+            color: #d1d5db; /* Tailwind gray-300 */
+            line-height: 1.7;
+        }
+        h1, h2, h3, .date-select-button {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        .gradient-text-header {
+            background: linear-gradient(90deg, #a5b4fc 0%, #818cf8 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-fill-color: transparent;
+        }
+        header {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 48, 163, 0.9) 100%);
+            position: relative; overflow: hidden; color: #ffffff;
+        }
+        header > div { position: relative; z-index: 2; }
+        .schedule-gradient { background: linear-gradient(135deg, rgba(31, 41, 55, 0.7) 0%, rgba(55, 48, 163, 0.3) 100%); }
+        .hourly-gradient { background: linear-gradient(135deg, rgba(55, 48, 163, 0.3) 0%, rgba(31, 41, 55, 0.7) 100%); }
+        .selection-gradient {
+             background: linear-gradient(135deg, rgba(55, 48, 163, 0.3) 0%, rgba(31, 41, 55, 0.7) 100%);
+        }
+        .content-card {
+            background-color: rgba(31, 41, 55, 0.6); backdrop-filter: blur(8px);
+            border: 1px solid rgba(75, 85, 99, 0.5); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem; overflow-x: auto;
+        }
+        .text-indigo-title { color: #a5b4fc; }
+        .text-violet-title { color: #c4b5fd; }
+        footer { background-color: #1f2937; border-top: 1px solid #374151; color: #9ca3af; }
+
+        /* --- Table Styling --- */
+        table { width: 100%; border-collapse: collapse; min-width: 550px; margin-top: 1rem; }
+        th, td { border: 1px solid rgba(55, 65, 81, 0.8); padding: 0.8rem 1rem; text-align: left; vertical-align: top; }
+        th { background-color: rgba(55, 65, 81, 0.7); font-family: 'Inter', sans-serif; font-weight: 600; color: #e5e7eb; font-size: 1.0em; }
+        #overview-table th[scope="row"] {
+            font-weight: 600; color: #c4b5fd; white-space: nowrap;
+            background-color: rgba(31, 41, 55, 0.5); width: 120px;
+        }
+        .hourly-table td:first-child { font-weight: 600; color: #93c5fd; white-space: nowrap; }
+
+        tbody tr:nth-child(odd) { background-color: rgba(17, 24, 39, 0.2); }
+        tbody tr:hover { background-color: rgba(55, 65, 81, 0.4); }
+        #overview-table td { line-height: 1.7; }
+        .hourly-table td:last-child { line-height: 1.6; }
+
+
+        /* --- Subject/Task Styling --- */
+        .subject-english, .subject-nepali, .subject-computer,
+        .subject-maths, .subject-physics, .subject-chemistry {
+            color: #e5e7eb; font-weight: 500;
+        }
+        .task-revision {
+            font-weight: 600; font-style: italic; color: #fde047;
+        }
+
+        /* --- Selection & Control Styling --- */
+        #date-selection { text-align: center; }
+        .date-select-button {
+            background-color: rgba(55, 65, 81, 0.7); border: 1px solid rgba(75, 85, 99, 0.5);
+            color: #e5e7eb; padding: 0.75rem 1.5rem; border-radius: 0.5rem;
+            margin: 0.5rem; cursor: pointer; transition: all 0.3s ease;
+            display: inline-block; backdrop-filter: blur(5px);
+        }
+        .date-select-button:hover {
+            background-color: rgba(75, 85, 99, 0.9); border-color: rgba(110, 121, 134, 0.7);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .back-button {
+             background-color: rgba(75, 85, 99, 0.7); border: 1px solid rgba(92, 103, 117, 0.5);
+             color: #e5e7eb; padding: 0.5rem 1rem; border-radius: 0.5rem;
+             margin-top: 1.5rem; cursor: pointer; transition: all 0.3s ease;
+             font-family: 'Inter', sans-serif; font-weight: 600;
+        }
+        .back-button:hover { background-color: rgba(92, 103, 117, 0.9); transform: translateY(-1px); }
+
+        /* Hide detailed sections by default */
+        .hourly-detail-section {
+            display: none;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="min-h-[30vh] md:min-h-[40vh] flex items-center justify-center text-center p-8">
+        <div class="max-w-3xl">
+            <h1 class="text-5xl md:text-7xl font-bold mb-4 gradient-text-header">Study Schedule</h1>
+            <p class="text-xl md:text-2xl text-gray-100 italic mt-2">April Exam Preparation - Detailed Plan</p>
+            <p class="mt-6 text-lg md:text-xl text-gray-200 leading-relaxed">
+                Select a date below for its detailed hourly schedule, or view the weekly topic overview.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-6 md:p-10 space-y-16">
+
+        <!-- Section 1: Date Selection Buttons -->
+        <section id="date-selection" class="p-6 md:p-8 content-card selection-gradient">
+            <h2 class="text-3xl md:text-4xl font-semibold mb-8 text-violet-title">Select Date for Hourly Details</h2>
+            <div id="selection-buttons">
+                <button class="date-select-button" onclick="showDateDetails('detail-25')">25th April</button>
+                <button class="date-select-button" onclick="showDateDetails('detail-26')">26th April</button>
+                <button class="date-select-button" onclick="showDateDetails('detail-27')">27th April</button>
+                <button class="date-select-button" onclick="showDateDetails('detail-28')">28th April</button>
+                <button class="date-select-button" onclick="showDateDetails('detail-29')">29th April</button>
+                <button class="date-select-button" onclick="showDateDetails('detail-30')">30th April</button>
+            </div>
+        </section>
+
+        <!-- Section 2: Overview Table (Pivoted, Comma Separated Topics) -->
+        <section id="overview-section" class="p-6 md:p-8 content-card schedule-gradient">
+            <h2 class="text-3xl md:text-4xl font-semibold mb-2 text-indigo-title">Daily Topics Overview</h2>
+            <div>
+                <table id="overview-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">25th April</th>
+                            <td><span class="subject-maths">Algebra</span>, <span class="subject-chemistry">Haloalkane</span>, <span class="subject-chemistry">Haloarene</span>, <span class="subject-chemistry">Alcohol</span>, <span class="subject-chemistry">Phenol</span>, <span class="subject-chemistry">Ether</span>, <span class="subject-physics">Mechanics</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">26th April</th>
+                            <td><span class="subject-maths">Trigonometry</span>, <span class="subject-maths">Vector</span>, <span class="task-revision">Calculus Formula Revision</span>, <span class="subject-physics">Wave Optics</span>, <span class="subject-chemistry">Aldehyde Ketone</span>, <span class="subject-chemistry">Carboxylic Acid</span>, <span class="subject-chemistry">Chemical Kinetics</span>, <span class="subject-maths">Anti-Derivative (First Exercise)</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">27th April</th>
+                            <td><span class="subject-maths">Conic Section</span>, <span class="subject-chemistry">Nitro Compound</span>, <span class="subject-chemistry">Amine</span>, <span class="subject-chemistry">Organometallic</span>, <span class="subject-physics">Thermodynamics (Physics)</span>, <span class="subject-chemistry">Volumetric Analysis</span>, <span class="subject-maths">Anti-Derivative (Trigonometry Exercise)</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">28th April</th>
+                            <td><span class="subject-physics">Electric Circuit</span>, <span class="subject-physics">Thermoelectric Effect</span>, <span class="subject-physics">AC</span>, <span class="subject-chemistry">Transition Elements</span>, <span class="subject-maths">Statistics</span>, <span class="subject-maths">Probability</span>, <span class="subject-chemistry">Thermodynamics(Chemistry)</span>, <span class="subject-maths">Anti-Derivative (Partial Fraction)</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">29th April</th>
+                            <td><span class="subject-maths">Derivatives (First exercise and L-Hospital Rule)</span>, <span class="subject-physics">Magnetism</span>, <span class="subject-chemistry">Electrochemistry</span>, <span class="subject-maths">Derivative(Tangent Normal, Differential, Rate Measure)</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">30th April</th>
+                            <td><span class="subject-physics">Modern Physics</span>, <span class="subject-maths">Differential Equation + Maths Small Topics</span>, <span class="subject-chemistry">Applied Chemistry</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Sections 3-8: Hourly Details (Hidden Initially) -->
+        <section id="detail-25" class="hourly-detail-section p-6 md:p-8 content-card hourly-gradient">
+             <button class="back-button" onclick="showSelectionView()">← Back to Date Selection</button>
+             <h3 class="text-2xl md:text-3xl font-semibold mb-2 mt-6 text-violet-title">Detailed Schedule: 25th April</h3>
+             <div>
+                 <table class="hourly-table">
+                     <thead>
+                         <tr>
+                             <th scope="col">Time</th>
+                             <th scope="col">Task</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                         <tr><td>10:00-11:00 AM</td><td><span class="subject-maths">Permutation and Combination</span></td></tr>
+                         <tr><td>11:00AM-12:00 PM</td><td><span class="subject-chemistry">Haloarenes, Haloalkane</span></td></tr>
+                         <tr><td>12:00 PM-1:00PM</td><td><span class="subject-physics">Simple Harmonic Motion</span></td></tr>
+                         <tr><td>1:00PM-2:00PM</td><td><span class="subject-chemistry">Phenol, Ether</span></td></tr>
+                         <tr><td>2:00PM-3:00PM</td><td><span class="subject-maths">Matrix Based System of Linear Equations</span>, <span class="subject-chemistry">Alcohol</span></td></tr>
+                         <tr><td>3:00PM-4:00PM</td><td><span class="subject-physics">Rotational Dynamics</span></td></tr>
+                         <tr><td>4:00PM-6:00PM</td><td><span class="subject-maths">Sequence and Series</span></td></tr>
+                         <tr><td>6:00PM-7:00PM</td><td><span class="subject-physics">Fluid Statics, Dynamics</span></td></tr>
+                         <tr><td>7:00PM-9:00PM</td><td><span class="subject-maths">Binomial Theorem</span></td></tr>
+                         <tr><td>9:00PM-10:00PM</td><td><span class="subject-maths">Complex Numbers</span></td></tr>
+                         <tr><td>10:00PM-11:00PM</td><td><span class="task-revision">Revision of All</span></td></tr>
+                     </tbody>
+                 </table>
+             </div>
+        </section>
+
+        <section id="detail-26" class="hourly-detail-section p-6 md:p-8 content-card schedule-gradient">
+             <button class="back-button" onclick="showSelectionView()">← Back to Date Selection</button>
+             <h3 class="text-2xl md:text-3xl font-semibold mb-2 mt-6 text-indigo-title">Detailed Schedule: 26th April</h3>
+             <div>
+                 <table class="hourly-table">
+                      <thead>
+                        <tr>
+                            <th scope="col">Time</th>
+                            <th scope="col">Task</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>5:00–6:00 AM</td><td><span class="subject-maths">Trigonometry (Properties of Triangle)-First Exercise</span></td></tr>
+                        <tr><td>6:00–7:00 AM</td><td><span class="subject-maths">Trigonometry (Properties of Triangle)-First Exercise</span></td></tr>
+                        <tr><td>7:00–8:00 AM</td><td><span class="subject-physics task-revision">Wave and Optics (Old is Gold)</span></td></tr>
+                        <tr><td>8:00–9:00 AM</td><td><span class="subject-physics task-revision">Wave and Optics (Old is Gold)</span></td></tr>
+                        <tr><td>9:00–10:00 AM</td><td><span class="subject-chemistry">Aldehyde and Ketone</span></td></tr>
+                        <tr><td>10:00–11:00 AM</td><td><span class="subject-chemistry">Carboxylic Acid</span></td></tr>
+                        <tr><td>11:00–12:00 PM</td><td><span class="subject-maths">Anti-Derivative (First Exercise)</span></td></tr>
+                        <tr><td>12:00–1:00 PM</td><td><span class="subject-chemistry">Chemical Kinetics</span></td></tr>
+                        <tr><td>1:00–2:00 PM</td><td><span class="subject-maths">Vector</span></td></tr>
+                        <tr><td>2:00–3:00 PM</td><td><span class="subject-computer task-revision">Computer (MOST IMP QUESTION REVISION)</span></td></tr>
+                        <tr><td>3:00–4:00 PM</td><td><span class="task-revision">Calculus Formula Revision + Revision of 25th April</span>, <span class="subject-maths task-revision">Anti-Derivative (First Exercise Questions Again)</span></td></tr>
+                        <tr><td>4:00–5:00 PM</td><td><span class="task-revision">If anything is remaining from</span> <span class="subject-chemistry task-revision">Aldehyde and Ketone</span> and <span class="subject-chemistry task-revision">Carboxylic Acid (Revise)</span></td></tr>
+                        <tr><td>5:00–6:00 PM</td><td><span class="subject-english">English (Grammar)</span></td></tr>
+                        <tr><td>6:00–7:00 PM</td><td><span class="subject-chemistry task-revision">Chemical Kinetics (Old is Gold)</span></td></tr>
+                        <tr><td>7:00–8:00 PM</td><td><span class="subject-chemistry task-revision">Aldehyde and Ketone (Old is Gold)</span></td></tr>
+                        <tr><td>8:00–9:00 PM</td><td><span class="subject-chemistry task-revision">Carboxylic Acid (Old is Gold)</span></td></tr>
+                        <tr><td>9:00–10:00 PM</td><td><span class="subject-maths task-revision">Trigonometry (Formula Revision+ Exercise go through)</span></td></tr>
+                        <tr><td>10:00–11:00 PM</td><td><span class="subject-nepali">Nepali Writing (Format)</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+         <section id="detail-27" class="hourly-detail-section p-6 md:p-8 content-card hourly-gradient">
+             <button class="back-button" onclick="showSelectionView()">← Back to Date Selection</button>
+             <h3 class="text-2xl md:text-3xl font-semibold mb-2 mt-6 text-violet-title">Detailed Schedule: 27th April</h3>
+             <div>
+                 <table class="hourly-table">
+                      <thead>
+                         <tr>
+                             <th scope="col">Time</th>
+                             <th scope="col">Task</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                         <tr><td>5:00–6:00 AM</td><td><span class="subject-chemistry">Volumetric Analysis-Part 1</span></td></tr>
+                         <tr><td>6:00–7:00 AM</td><td><span class="subject-chemistry">Volumetric Analysis-Part 2</span></td></tr>
+                         <tr><td>7:00–8:00 AM</td><td><span class="subject-maths">Parabola</span></td></tr>
+                         <tr><td>8:00–9:00 AM</td><td><span class="subject-maths">Parabola</span></td></tr>
+                         <tr><td>9:00–10:00 AM</td><td><span class="subject-chemistry">Nitro Compound, Organometallic Compound</span></td></tr>
+                         <tr><td>10:00–11:00 AM</td><td><span class="subject-maths">Circle</span></td></tr>
+                         <tr><td>11:00–12:00 PM</td><td><span class="subject-physics">Thermodynamics Physics</span></td></tr>
+                         <tr><td>12:00–1:00 PM</td><td><span class="subject-physics">Thermodynamics Physics</span></td></tr>
+                         <tr><td>1:00–2:00 PM</td><td><span class="subject-maths">Hyperbola, Ellipse</span></td></tr>
+                         <tr><td>2:00–3:00 PM</td><td><span class="subject-maths">Antiderivative (Trigonometry Exercise)</span></td></tr>
+                         <tr><td>3:00–4:00 PM</td><td><span class="subject-chemistry">Amine</span></td></tr>
+                         <tr><td>4:00–5:00 PM</td><td><span class="subject-maths task-revision">Old is Gold of Conic Section</span></td></tr>
+                         <tr><td>5:00–6:00 PM</td><td><span class="subject-maths task-revision">Old is Gold of Conic Section</span></td></tr>
+                         <tr><td>6:00–7:00 PM</td><td><span class="subject-physics task-revision">Old is Gold of Thermodynamics Physics</span></td></tr>
+                         <tr><td>7:00–8:00 PM</td><td><span class="subject-physics task-revision">Old is Gold of Thermodynamics Physics</span></td></tr>
+                         <tr><td>8:00–9:00 PM</td><td><span class="subject-chemistry task-revision">Old is gold of Amines, Nitro compound, Organometallic Compound, Amine</span></td></tr>
+                         <tr><td>9:00–10:00 PM</td><td><span class="subject-chemistry task-revision">Old is gold of Amines, Nitro compound, Organometallic Compound, Amine</span></td></tr>
+                         <tr><td>10:00–11:00 PM</td><td><span class="subject-english">English Writing Format</span></td></tr>
+                     </tbody>
+                 </table>
+             </div>
+         </section>
+
+        <section id="detail-28" class="hourly-detail-section p-6 md:p-8 content-card schedule-gradient">
+             <button class="back-button" onclick="showSelectionView()">← Back to Date Selection</button>
+             <h3 class="text-2xl md:text-3xl font-semibold mb-2 mt-6 text-indigo-title">Detailed Schedule: 28th April</h3>
+              <div>
+                 <table class="hourly-table">
+                      <thead>
+                        <tr>
+                            <th scope="col">Time</th>
+                            <th scope="col">Task</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>5:00–6:00 AM</td><td><span class="task-revision">Revision of 25th April, 26th April, 27th April</span></td></tr>
+                        <tr><td>6:00–7:00 AM</td><td><span class="subject-chemistry">Thermodynamics (Chemistry)</span></td></tr>
+                        <tr><td>7:00–8:00 AM</td><td><span class="subject-physics">Thermoelectric Effect</span>, <span class="subject-chemistry">Transition Elements</span></td></tr>
+                        <tr><td>8:00–9:00 AM</td><td><span class="subject-maths">Statistics</span></td></tr>
+                        <tr><td>9:00–10:00 AM</td><td><span class="subject-physics task-revision">AC (Old is Gold Theory)</span> + <span class="subject-maths">Derivatives</span></td></tr>
+                        <tr><td>10:00–11:00 AM</td><td><span class="subject-physics task-revision">AC (Old is Gold Theory)</span></td></tr>
+                        <tr><td>11:00–12:00 PM</td><td><span class="subject-maths">Probability</span></td></tr>
+                        <tr><td>12:00–1:00 PM</td><td><span class="subject-physics">Electric Circuit</span></td></tr>
+                        <tr><td>1:00–2:00 PM</td><td><span class="subject-physics">Electric Circuit</span></td></tr>
+                        <tr><td>2:00–3:00 PM</td><td><span class="subject-nepali">Nepali Grammar</span></td></tr>
+                        <tr><td>3:00–4:00 PM</td><td><span class="subject-computer">Computer</span></td></tr>
+                        <tr><td>4:00–5:00 PM</td><td><span class="subject-physics task-revision">Old is Gold (AC Numerical)</span></td></tr>
+                        <tr><td>5:00–6:00 PM</td><td><span class="subject-physics task-revision">Old is Gold (AC Numerical)</span></td></tr>
+                        <tr><td>6:00–7:00 PM</td><td><span class="subject-english">English Grammar</span></td></tr>
+                        <tr><td>7:00–8:00 PM</td><td><span class="subject-physics task-revision">Electric Circuit Old is Gold</span></td></tr>
+                        <tr><td>8:00–9:00 PM</td><td><span class="subject-maths">Anti-Derivative (Partial Fraction Exercise)</span></td></tr>
+                        <tr><td>9:00–10:00 PM</td><td><span class="subject-maths">Anti-Derivative (Partial Fraction Exercise)</span></td></tr>
+                        <tr><td>10:00–11:00 PM</td><td><span class="task-revision">Revision of the DAY</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="detail-29" class="hourly-detail-section p-6 md:p-8 content-card hourly-gradient">
+             <button class="back-button" onclick="showSelectionView()">← Back to Date Selection</button>
+             <h3 class="text-2xl md:text-3xl font-semibold mb-2 mt-6 text-violet-title">Detailed Schedule: 29th April</h3>
+             <div>
+                 <table class="hourly-table">
+                      <thead>
+                         <tr>
+                             <th scope="col">Time</th>
+                             <th scope="col">Task</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                         <tr><td>5:00–6:00 AM</td><td><span class="task-revision">Revision of pervious day</span></td></tr>
+                         <tr><td>6:00–7:00 AM</td><td><span class="subject-maths">Derivative (First Exercise)</span></td></tr>
+                         <tr><td>7:00–8:00 AM</td><td><span class="subject-physics">Magnetism</span></td></tr>
+                         <tr><td>8:00–9:00 AM</td><td><span class="subject-physics">Magnetism</span></td></tr>
+                         <tr><td>9:00–10:00 AM</td><td><span class="subject-physics">Magnetism</span></td></tr>
+                         <tr><td>10:00–11:00 AM</td><td><span class="subject-chemistry">Electrochemistry</span></td></tr>
+                         <tr><td>11:00–12:00 PM</td><td><span class="subject-chemistry">Electrochemistry</span></td></tr>
+                         <tr><td>12:00–1:00 PM</td><td><span class="subject-maths">Derivative (L-Hospital Rule)</span></td></tr>
+                         <tr><td>1:00–2:00 PM</td><td><span class="subject-maths">Derivative (Tangent-Normal)</span></td></tr>
+                         <tr><td>2:00–3:00 PM</td><td><span class="subject-physics task-revision">Magnetism (Revision)</span></td></tr>
+                         <tr><td>3:00–4:00 PM</td><td><span class="subject-computer">Computer</span></td></tr>
+                         <tr><td>4:00–5:00 PM</td><td><span class="subject-computer">Computer</span></td></tr>
+                         <tr><td>5:00–6:00 PM</td><td><span class="subject-maths">Derivative (Rate Measure)</span></td></tr>
+                         <tr><td>6:00–7:00 PM</td><td><span class="subject-english">English Grammar</span></td></tr>
+                         <tr><td>7:00–8:00 PM</td><td><span class="subject-maths">Derivative (Differential)</span></td></tr>
+                         <tr><td>8:00–9:00 PM</td><td><span class="task-revision">Revision of Pervious Day</span></td></tr>
+                         <tr><td>9:00–10:00 PM</td><td><span class="task-revision">Revision of Pervious Day</span></td></tr>
+                         <tr><td>10:00–11:00 PM</td><td><span class="task-revision">Revision of Pervious Day</span></td></tr>
+                     </tbody>
+                 </table>
+             </div>
+         </section>
+
+        <section id="detail-30" class="hourly-detail-section p-6 md:p-8 content-card schedule-gradient">
+             <button class="back-button" onclick="showSelectionView()">← Back to Date Selection</button>
+             <h3 class="text-2xl md:text-3xl font-semibold mb-2 mt-6 text-indigo-title">Detailed Schedule: 30th April</h3>
+             <div>
+                 <table class="hourly-table">
+                      <thead>
+                        <tr>
+                            <th scope="col">Time</th>
+                            <th scope="col">Task</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>5:00–6:00 AM</td><td><span class="task-revision">Revision of Pervious Day</span></td></tr>
+                        <tr><td>6:00–7:00 AM</td><td><span class="subject-physics">Photon</span></td></tr>
+                        <tr><td>7:00–8:00 AM</td><td><span class="subject-physics">Photon</span></td></tr>
+                        <tr><td>8:00–9:00 AM</td><td><span class="subject-maths">Differential Equation</span></td></tr>
+                        <tr><td>9:00–10:00 AM</td><td><span class="subject-maths">Differential Equation</span></td></tr>
+                        <tr><td>10:00–11:00 AM</td><td><span class="subject-maths">Differential Equation</span></td></tr>
+                        <tr><td>11:00–12:00 PM</td><td><span class="subject-physics">Electron</span></td></tr>
+                        <tr><td>12:00–1:00 PM</td><td><span class="subject-physics">Electron</span></td></tr>
+                        <tr><td>1:00–2:00 PM</td><td><span class="subject-physics">Quantization of Energy</span></td></tr>
+                        <tr><td>2:00–3:00 PM</td><td><span class="subject-physics">Quantization of Energy</span></td></tr>
+                        <tr><td>3:00–4:00 PM</td><td><span class="subject-computer">Computer</span></td></tr>
+                        <tr><td>4:00–5:00 PM</td><td><span class="subject-computer">Computer</span></td></tr>
+                        <tr><td>5:00–6:00 PM</td><td><span class="subject-maths">Maths (Smaller Topic)</span></td></tr>
+                        <tr><td>6:00–7:00 PM</td><td><span class="subject-maths">Maths (Smaller Topic)</span></td></tr>
+                        <tr><td>7:00–8:00 PM</td><td><span class="subject-chemistry">Applied Chemistry</span></td></tr>
+                        <tr><td>8:00–9:00 PM</td><td><span class="subject-chemistry">Applied Chemistry</span></td></tr>
+                        <tr><td>9:00–10:00 PM</td><td><span class="subject-physics">Semi-Conductor, Radioactivity</span></td></tr>
+                        <tr><td>10:00–11:00 PM</td><td><span class="task-revision">Revision of Pervious Day</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 mt-16">
+        <p>Study Plan till 30 April</p>
+    </footer>
+
+    <script>
+        // Get references to the sections
+        const selectionSection = document.getElementById('date-selection');
+        const overviewSection = document.getElementById('overview-section'); // Get overview section too
+        const detailSections = document.querySelectorAll('.hourly-detail-section');
+
+        // Function to show a specific date's detailed schedule
+        function showDateDetails(detailId) {
+            // Hide the selection section and overview section
+            if (selectionSection) selectionSection.style.display = 'none';
+            if (overviewSection) overviewSection.style.display = 'none'; // Hide overview too
+
+            // Hide all detailed sections first
+            detailSections.forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show the selected detail section
+            const selectedDetail = document.getElementById(detailId);
+            if (selectedDetail) {
+                selectedDetail.style.display = 'block';
+                window.scrollTo(0, selectedDetail.offsetTop - 100);
+            }
+        }
+
+        // Function to show the selection section and overview, hide details
+        function showSelectionView() {
+            // Hide all detailed sections
+            detailSections.forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show the selection section and overview section
+            if (selectionSection) selectionSection.style.display = 'block';
+            if (overviewSection) overviewSection.style.display = 'block'; // Show overview again
+
+            window.scrollTo(0, selectionSection.offsetTop - 100);
+        }
+        // Initial state: ensure selection and overview are visible, details hidden
+        document.addEventListener('DOMContentLoaded', () => {
+             if (selectionSection) selectionSection.style.display = 'block';
+             if (overviewSection) overviewSection.style.display = 'block';
+             // Hide all detail sections explicitly on load in case CSS didn't catch them
+             detailSections.forEach(section => {
+                section.style.display = 'none';
+             });
+        });
+
+    </script>
+
+</body>
+</html>
